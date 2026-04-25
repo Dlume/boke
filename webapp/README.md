@@ -21,3 +21,5 @@ python3 webapp/app.py
 ## 说明
 - 当前为 **Python 标准库 + SQLite** 的 MVP 落地版，无第三方依赖，便于在受限环境直接跑通。
 - 生产可替换到 Postgres（已有 `db/schema_v1.sql`）。
+- 长期后台守护、域名与公网接入请看 `DEPLOYMENT_GUIDE.md`（systemd/supervisor/nginx/TLS）。
+- 功能齐全版逐项实施清单见 `FULL_FEATURE_ROADMAP.md`。
