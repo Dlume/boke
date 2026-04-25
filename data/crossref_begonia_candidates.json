@@ -1,5 +1,6 @@
 {
-  "generated_at": "2026-04-24T15:49:19.406072+00:00",
+  "generated_at": "2026-04-25T14:02:02.271002+00:00",
+  "mode": "offline-sample",
   "query": "Begonia",
   "from_date": "2025-01-01",
   "count": 1,
@@ -17,5 +18,9 @@
       "abstract": null,
       "note": "Generated because runtime network cannot reach Crossref from this container."
     }
-  ]
+  ],
+  "env_proxy": {
+    "HTTP_PROXY": true,
+    "HTTPS_PROXY": true
+  }
 }

@@ -23,8 +23,8 @@
 ## 采集脚本
 - `scripts/collect_sources.py`
   - 默认：实时请求 Crossref API。
+  - 直连模式：`--direct`（忽略 HTTP(S)_PROXY，适用于允许直连的环境）。
   - 受限环境：`--offline-sample` 生成标准化模板数据。
 
 ## 输出文件
 - `data/crossref_begonia_candidates.json`
-
