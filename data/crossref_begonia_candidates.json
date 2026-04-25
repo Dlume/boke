@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-04-24T15:49:19.406072+00:00",
+  "query": "Begonia",
+  "from_date": "2025-01-01",
+  "count": 1,
+  "items": [
+    {
+      "source": "crossref",
+      "title": "[OFFLINE SAMPLE] Begonia candidate article",
+      "doi": null,
+      "url": "https://api.crossref.org/works",
+      "pdf_url": null,
+      "journal_title": null,
+      "published_on": "2025-01-01",
+      "type": "journal-article",
+      "score": null,
+      "abstract": null,
+      "note": "Generated because runtime network cannot reach Crossref from this container."
+    }
+  ]
+}
