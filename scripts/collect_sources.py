@@ -14,6 +14,7 @@ import os
 import sys
 import urllib.parse
 import urllib.request
+from urllib.error import URLError
 from datetime import datetime, timezone
 from typing import Any
 
@@ -101,29 +102,50 @@ def main() -> int:
     parser.add_argument("--from-date", default="2025-01-01", help="Publication lower bound (YYYY-MM-DD)")
     parser.add_argument("--rows", type=int, default=30, help="Max rows from Crossref")
     parser.add_argument("--direct", action="store_true", help="Bypass HTTP(S)_PROXY and connect directly")
+    parser.add_argument(
+        "--retry-direct-on-403",
+        action="store_true",
+        default=True,
+        help="When proxy tunnel returns 403, retry once via direct egress",
+    )
     parser.add_argument("--offline-sample", action="store_true", help="Generate offline sample data")
     parser.add_argument("--output", default="data/crossref_begonia_candidates.json", help="Output JSON path")
     args = parser.parse_args()
 
     if args.offline_sample:
         items = build_offline_sample(args.query, args.from_date)
+        mode = "offline-sample"
     else:
         try:
             items = collect_crossref(args.query, args.from_date, args.rows, direct=args.direct)
+            mode = "live-direct" if args.direct else "live-proxy"
         except Exception as exc:  # noqa: BLE001
             print(f"[ERROR] live collection failed: {exc}", file=sys.stderr)
-            if "Tunnel connection failed: 403" in str(exc):
+            tunnel_403 = "Tunnel connection failed: 403" in str(exc)
+            if tunnel_403 and args.retry_direct_on_403 and not args.direct:
+                print("[INFO] retrying once with --direct due to proxy tunnel 403 ...", file=sys.stderr)
+                try:
+                    items = collect_crossref(args.query, args.from_date, args.rows, direct=True)
+                    mode = "live-direct-fallback"
+                except URLError as direct_exc:
+                    print(f"[ERROR] direct fallback failed: {direct_exc}", file=sys.stderr)
+                    print("[HINT] re-run with --offline-sample in restricted environments.", file=sys.stderr)
+                    return 1
+            elif tunnel_403:
                 print(
                     "[HINT] proxy blocked CONNECT tunnel. Try --direct in a direct-egress environment, "
                     "or unset HTTP(S)_PROXY.",
                     file=sys.stderr,
                 )
-            print("[HINT] re-run with --offline-sample in restricted environments.", file=sys.stderr)
-            return 1
+                print("[HINT] re-run with --offline-sample in restricted environments.", file=sys.stderr)
+                return 1
+            else:
+                print("[HINT] re-run with --offline-sample in restricted environments.", file=sys.stderr)
+                return 1
 
     result = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "offline-sample" if args.offline_sample else ("live-direct" if args.direct else "live-proxy"),
+        "mode": mode,
         "query": args.query,
         "from_date": args.from_date,
         "count": len(items),
