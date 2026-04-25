@@ -2,16 +2,28 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    HOST=0.0.0.0 \
-    PORT=8080 \
-    BEGONIA_DB=/data/begonia.db
+# Copy application code
+COPY webapp/ ./webapp/
+COPY scripts/ ./scripts/
+COPY db/ ./db/
 
-COPY . /app
+# Install dependencies (none required for stdlib, but good practice)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN mkdir -p /data
+# Create non-root user
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
 
+# Initialize database
+RUN python webapp/init_db.py
+
+# Expose port
 EXPOSE 8080
 
-CMD ["sh", "-c", "python3 webapp/init_db.py && python3 webapp/app.py"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/ || exit 1
+
+# Run application
+CMD ["python", "webapp/app.py"]

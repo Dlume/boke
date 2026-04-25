@@ -1,15 +1,18 @@
+# Render.yaml - Render.com deployment configuration
 services:
   - type: web
-    name: begonia-web
-    runtime: docker
+    name: begonia-illustrated
+    env: python
+    region: oregon  # Change to singapore for Asia proximity
     plan: free
-    dockerfilePath: ./Dockerfile
-    autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    startCommand: python webapp/app.py
     envVars:
-      - key: HOST
-        value: 0.0.0.0
+      - key: PYTHON_VERSION
+        value: 3.11.0
       - key: PORT
-        value: 10000
+        value: 8080
       - key: BEGONIA_DB
-        value: /data/begonia.db
-    healthCheckPath: /api/species?page_size=1
+        value: /tmp/begonia.db  # Ephemeral for Render free tier
+    healthCheckPath: /
+    autoDeploy: true
