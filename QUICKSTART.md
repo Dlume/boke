@@ -21,13 +21,25 @@ git push -u origin main
 4. Render 会自动读取 `render.yaml` 和 `Dockerfile`
 5. 点击 `Create Web Service`
 
-## 3️⃣ 配置自动部署
+## 3️⃣ 配置 GitHub Actions 自动部署
 
-1. 在 Render 服务页面 → `Settings` → `Deploy Hooks` → 复制 URL
-2. 到 GitHub 仓库 → `Settings` → `Secrets and variables` → `Actions`
-3. 新增 Secret:
+### 获取 Render Deploy Hook
+1. 在 Render 服务页面 → `Settings` → `Deploy Hooks` → 复制 URL (格式: `https://api.render.com/deploy/srv-xxx?key=yyy`)
+
+### 配置 GitHub Secret
+1. 进入 GitHub 仓库 (`Dlume/boke`) → `Settings` → `Secrets and variables` → `Actions`
+2. 点击 `New repository secret`
+3. 填写：
    - **Name**: `RENDER_DEPLOY_HOOK`
    - **Value**: 粘贴刚才复制的 URL
+
+### 自动触发原理
+- 仓库已包含工作流文件: `.github/workflows/deploy.yml`
+- 每次 `git push` 到 `main` 分支，GitHub Actions 会自动：
+  1. 运行测试 (Python 3.11 环境)
+  2. 调用 Render Deploy Hook
+  3. 触发 Render 构建和部署
+- 你可以在 GitHub 仓库的 `Actions` 标签页查看运行日志。
 
 之后每次 `git push` 到 `main`，都会自动触发部署。
 
